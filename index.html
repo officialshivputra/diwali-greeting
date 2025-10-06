@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🎆 Happy Diwali 🎇</title>
+  <style>
+    body{
+      background:linear-gradient(135deg,#ffeb3b,#ff9800);
+      font-family:sans-serif;
+      text-align:center;
+      color:#2b2b2b;
+      padding:30px;
+    }
+    h1{font-size:28px;margin-top:40px;}
+    input{
+      padding:10px;border-radius:8px;border:none;font-size:16px;
+    }
+    button{
+      padding:10px 16px;background:#e65100;color:#fff;border:none;
+      border-radius:8px;font-weight:bold;margin-top:10px;cursor:pointer;
+    }
+    .card{
+      background:#fff;padding:20px;border-radius:12px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.2);margin-top:30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪔 Happy Diwali Greeting Generator 🪔</h1>
+  <p>अपना नाम लिखो और कार्ड बनाओ 🎉</p>
+  <input id="name" placeholder="अपना नाम यहाँ डालो" />
+  <button onclick="makeCard()">Generate</button>
+
+  <div id="card" class="card" style="display:none;">
+    <h2 id="msg"></h2>
+    <p>आप सभी को दीपावली की हार्दिक शुभकामनाएँ! 💫</p>
+  </div>
+
+<script>
+function makeCard(){
+  const name=document.getElementById('name').value.trim();
+  if(!name){alert('नाम डालो भाई 😄');return;}
+  document.getElementById('card').style.display='block';
+  document.getElementById('msg').innerText=`${name} की तरफ़ से Happy Diwali! 🎉`;
+}
+</script>
+</body>
+</html>

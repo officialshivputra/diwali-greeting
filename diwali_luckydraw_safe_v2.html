@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🎆 Diwali Lucky Draw — शुभ दीपावली</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:#fff8ed;color:#2b2b2b;margin:0;padding:18px}
+  .wrap{max-width:820px;margin:14px auto}
+  .card{background:linear-gradient(120deg,#ffecd2,#fcb69f);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.06)}
+  h1{margin:0 0 8px 0;font-size:20px}
+  input, button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #e6a373}
+  button{background:#ff5722;color:#fff;border:none;cursor:pointer}
+  .share-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .note{font-size:13px;color:#5a3b00;margin-top:8px}
+  .hidden{display:none}
+  .earn-link{margin-top:16px;padding:12px;background:#fff;border-radius:8px;border:1px dashed #ddd;text-align:center}
+  .count-badge{background:#fff;padding:6px 10px;border-radius:12px;font-weight:700;display:inline-block;margin-left:8px}
+  .terms{background:#fff;padding:12px;border-radius:8px;margin-top:12px;border-left:4px solid #ffd54f}
+  .small{font-size:13px;color:#4b4b4b}
+  a.btn{display:inline-block;padding:10px 16px;background:#ff5722;color:#fff;border-radius:8px;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🎆 Diwali Lucky Draw — शुभ दीपावली</h1>
+    <p>नीचे अपना नाम डालें और personalized कार्ड बनाएं। 5 दोस्तों को शेयर करने पर स्पेशल लिंक अनलॉक होगा।</p>
+
+    <label>अपना नाम: <input id="name" placeholder="अपना नाम लिखें"/></label>
+    <div style="margin-top:10px">
+      <button id="generateBtn">कार्ड बनाओ</button>
+      <span class="count-badge" id="shareCountBadge">Shares: 0</span>
+    </div>
+
+    <div id="banner" class="hidden" style="margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#ff7043,#8e24aa);color:#fff;text-align:center;">
+      <div id="bannerText"></div>
+      <div class="note">पहले 5 दोस्तों के साथ शेयर करें — इसके बाद स्पेशल लिंक अनलॉक होगा।</div>
+    </div>
+
+    <div class="share-row hidden" id="shareRow">
+      <button id="whBtn">WhatsApp पर शेयर करें</button>
+      <button id="tgBtn">Telegram पर शेयर करें</button>
+      <button id="copyBtn">Link Copy करें</button>
+    </div>
+
+    <div id="afterUnlock" class="hidden earn-link">
+      <p style="margin:6px 0"><strong>बधाई!</strong> आपने शेयर पूरा कर लिया है — नीचे दिए गए बटन पर क्लिक करें:</p>
+      <!-- Replace '#' with your earning/referral link -->
+      <a id="earnBtn" class="btn" href="#" target="_blank" rel="noopener noreferrer">Open Special Offer / Redeem Coupon</a>
+      <div class="small" style="margin-top:8px">(यह लिंक तभी दिखेगा जब 5 शेयर पूरे होंगे)</div>
+    </div>
+
+    <div id="afterSubmit" class="hidden" style="margin-top:12px"></div>
+
+    <div class="terms">
+      <strong>नियम एवं शर्तें — Terms & Conditions:</strong>
+      <ul>
+        <li>यह एक मनोरंजन-उद्देश्य (entertainment-only) लकी ड्रॉ है। No guarantee of reward is provided.</li>
+        <li>Participation does not create any legally enforceable right to a recharge or coupon.</li>
+        <li>Winners will be selected at random and are subject to verification. Fraudulent entries will be disqualified.</li>
+        <li>Owner/website may use affiliate links or sponsored offers for the redeem link; ensure proper disclosure to users.</li>
+      </ul>
+      <p class="small">Owner note: Replace the href of the "Open Special Offer" button with your earning/referral/affiliate link after uploading this file to your site.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Config: replace with your real earning/referral link after upload
+const OFFER_LINK = "#"; // <-- change to your link
+
+// Elements
+const nameInput = document.getElementById('name');
+const generateBtn = document.getElementById('generateBtn');
+const banner = document.getElementById('banner');
+const bannerText = document.getElementById('bannerText');
+const shareRow = document.getElementById('shareRow');
+const whBtn = document.getElementById('whBtn');
+const tgBtn = document.getElementById('tgBtn');
+const copyBtn = document.getElementById('copyBtn');
+const shareCountBadge = document.getElementById('shareCountBadge');
+const afterUnlock = document.getElementById('afterUnlock');
+const earnBtn = document.getElementById('earnBtn');
+const afterSubmit = document.getElementById('afterSubmit');
+
+const STORAGE_KEY = 'diwali_luckydraw_state_v2';
+
+function loadState(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : {count:0}; }
+  catch(e){ return {count:0}; }
+}
+function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+let state = loadState();
+updateUI();
+
+generateBtn.addEventListener('click', ()=>{
+  const name = (nameInput.value || '').trim() || 'आप';
+  banner.classList.remove('hidden');
+  shareRow.classList.remove('hidden');
+  bannerText.innerHTML = `<h2>🎉 ${escapeHtml(name)} की तरफ़ से Happy Diwali!</h2><p>अपने 5 दोस्तों के साथ यह कार्ड शेयर करें — स्पेशल लिंक अनलॉक होगा।</p>`;
+  earnBtn.href = OFFER_LINK;
+});
+
+function updateUI(){
+  shareCountBadge.textContent = 'Shares: ' + (state.count || 0);
+  if((state.count || 0) >= 5){
+    afterUnlock.classList.remove('hidden');
+    shareRow.classList.add('hidden');
+  } else {
+    afterUnlock.classList.add('hidden');
+    shareRow.classList.remove('hidden');
+  }
+}
+
+function recordShare(){
+  const now = Date.now();
+  if(state.last && now - state.last < 600) return; // avoid accidental double clicks
+  state.last = now;
+  state.count = Math.min(999, (state.count || 0) + 1);
+  saveState(state);
+  updateUI();
+  afterSubmit.classList.remove('hidden');
+  afterSubmit.innerHTML = `<div class="small">ध्यान: आपने अभी ${state.count} बार शेयर किया है। 5 बार शेयर करने पर लिंक अनलॉक होगा।</div>`;
+}
+
+whBtn.addEventListener('click', ()=>{
+  const text = encodeURIComponent(bannerText.innerText + "\n" + window.location.href);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+  recordShare();
+});
+tgBtn.addEventListener('click', ()=>{
+  const text = encodeURIComponent(bannerText.innerText + "\n" + window.location.href);
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${text}`, '_blank');
+  recordShare();
+});
+copyBtn.addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText(window.location.href); alert('Link copied — अब paste कर के भेज दें'); }
+  catch(e){ prompt('Copy this link', window.location.href); }
+  recordShare();
+});
+
+// Ensure earn button blocked until unlocked or placeholder set
+earnBtn.addEventListener('click', (e)=>{
+  if((state.count || 0) < 5){ e.preventDefault(); alert('पहले 5 दोस्तों को शेयर करें — फिर लिंक खुलेगा।'); }
+  else if(earnBtn.href === '#' || !earnBtn.href || earnBtn.href === window.location.href){ e.preventDefault(); alert('Owner: कृपया earn/referral link यहाँ सेट करें।'); }
+});
+
+// basic html escape
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]}); }
+</script>
+</body>
+</html>

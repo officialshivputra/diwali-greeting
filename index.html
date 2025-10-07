@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🪔 दिवाली स्पेशल — Happy Diwali</title>
+<style>
+  /* Basic layout */
+  :root{--bg:#0b0b1a;--card:#fff;--accent:#ff5722;--accent2:#ffd54f}
+  body{margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial;background: radial-gradient(circle at 10% 10%, #2b0036 0%, #0b1020 40%, #02020a 100%);color:#fff;min-height:100vh;overflow:hidden}
+  .wrap{max-width:920px;margin:0 auto;padding:28px;position:relative;z-index:2}
+  .center-card{background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));backdrop-filter:blur(6px);border-radius:16px;padding:26px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.6);margin-top:8vh}
+  h1{margin:0;font-size:26px;letter-spacing:0.6px}
+  p.lead{margin:8px 0 18px 0;color:#ffe9b8}
+  input.name{width:70%;max-width:420px;padding:12px 14px;border-radius:999px;border:none;font-size:16px;outline:none;background:rgba(255,255,255,0.06);color:#fff}
+  button.primary{padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(90deg,var(--accent),#ff8a50);color:#111;font-weight:700;cursor:pointer;margin-left:10px}
+  .share-row{margin-top:16px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .wh-btn{background:#25D366;color:#fff;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+  .small{font-size:13px;color:#ffdca6;margin-top:8px}
+  .badge{position:fixed;right:14px;top:14px;background:rgba(255,255,255,0.06);padding:8px 12px;border-radius:999px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(4px)}
+  .surprise{margin-top:18px;padding:16px;border-radius:12px;background:linear-gradient(90deg,#fff5e6, #fff1f0);color:#222;display:none}
+  .surprise a{display:inline-block;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,#ff5722,#ff8a50);color:#fff;text-decoration:none;font-weight:800}
+  .terms-link{position:fixed;right:14px;bottom:14px;font-size:13px;color:#ffd54f;cursor:pointer;text-decoration:underline}
+  /* fireworks canvas full screen */
+  canvas#fwall{position:fixed;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  footer.note{margin-top:20px;color:#ffdca6;font-size:13px}
+  /* modal */
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:9999}
+  .modal .box{background:#fff;color:#111;padding:18px;border-radius:10px;max-width:720px;width:92%}
+  .closebtn{float:right;background:#ddd;border-radius:8px;padding:6px 8px;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="fwall"></canvas>
+<div class="wrap">
+  <div class="center-card">
+    <h1>🪔 शुभ दीपावली</h1>
+    <p class="lead">अपना नाम डालें और अपना personalized दिवाली संदेश बनाएं — दोस्तों के साथ शेयर करें और मस्ती मनाएं!</p>
+
+    <div>
+      <input id="nameInput" class="name" placeholder="अपना नाम लिखें — जैसे: Priyanshu" />
+      <button id="gen" class="primary">Generate</button>
+    </div>
+
+    <div id="gbox" style="display:none;margin-top:18px;">
+      <h2 id="gtext" style="margin:0;font-size:20px"></h2>
+      <p class="small">नीचे WhatsApp बटन से शेयर करें — 5 शेयर होने पर Surprise सेक्शन खुल जाएगा।</p>
+
+      <div class="share-row">
+        <button id="wa" class="wh-btn">Share on WhatsApp to Unlock Surprise 🎁</button>
+        <button id="copy" class="wh-btn" style="background:#555">Copy Link</button>
+      </div>
+
+      <div id="surprise" class="surprise" aria-hidden="true">
+        <h3 style="margin:0 0 8px 0">🎉 Surprise Unlocked!</h3>
+        <p style="margin:0 0 12px 0">आपने 5 शेयर पूरे किए — यह रही आपकी स्पेशल लिंक:</p>
+        <a id="offerLink" href="#" target="_blank" rel="noopener noreferrer">यहाँ अपना स्पॉन्सर लिंक जोड़ें</a>
+      </div>
+    </div>
+
+    <footer class="note">Enjoy the lights — Share the joy. ✨</footer>
+  </div>
+</div>
+
+<div id="shareBadge" class="badge">Total shares: 0</div>
+<div class="terms-link" id="termsBtn">Terms & Conditions</div>
+
+<!-- modal for terms -->
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <button class="closebtn" id="closeModal">Close</button>
+    <h3>Terms & Conditions</h3>
+    <p>यह पेज सिर्फ़ शुभकामनाओं और मनोरंजन के लिए है। किसी भी प्रकार का रिचार्ज या नगद पुरस्कार गारंटीकृत नहीं है।</p>
+    <p>Owner: Replace the sponsor link in the surprise section with your affiliate/offer link after deployment.</p>
+  </div>
+</div>
+
+<script>
+// fireworks script (simple colorful bursts)
+const canvas = document.getElementById('fwall');
+const ctx = canvas.getContext('2d');
+let cw, ch, fireworks = [], particles = [];
+function resize(){
+  cw = canvas.width = innerWidth;
+  ch = canvas.height = innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+class Firework {
+  constructor(sx, sy, tx, ty, hue){
+    this.x = sx; this.y = sy; this.sx = sx; this.sy = sy; this.tx = tx; this.ty = ty; this.hue = hue;
+    this.distance = Math.hypot(tx-sx,ty-sy); this.travelled = 0; this.speed = 4 + Math.random()*3; this.angle = Math.atan2(ty-sy, tx-sx);
+  }
+  update(){
+    const vx = Math.cos(this.angle) * this.speed;
+    const vy = Math.sin(this.angle) * this.speed;
+    this.x += vx; this.y += vy; this.travelled += Math.hypot(vx,vy);
+    if(this.travelled >= this.distance){
+      // explode
+      for(let i=0;i<30;i++){ particles.push(new Particle(this.x,this.y,this.hue)); }
+      return true; // remove firework
+    }
+    return false;
+  }
+  draw(){
+    ctx.beginPath(); ctx.moveTo(this.sx,this.sy); ctx.lineTo(this.x,this.y); ctx.strokeStyle = `hsl(${this.hue},100%,60%)`; ctx.stroke();
+  }
+}
+class Particle {
+  constructor(x,y,hue){
+    this.x = x; this.y = y; this.hue = hue; this.speed = Math.random()*6+1; this.angle = Math.random()*Math.PI*2;
+    this.friction = 0.96; this.gravity = 0.06; this.alpha = 1; this.decay = 0.015 + Math.random()*0.02;
+  }
+  update(){
+    this.speed *= this.friction; this.x += Math.cos(this.angle)*this.speed; this.y += Math.sin(this.angle)*this.speed + this.gravity; this.alpha -= this.decay;
+    return this.alpha <= 0;
+  }
+  draw(){
+    ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle = `hsla(${this.hue},100%,60%,${this.alpha})`; ctx.fill();
+  }
+}
+function loop(){
+  ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect(0,0,cw,ch); ctx.globalCompositeOperation = 'lighter';
+  if(Math.random() < 0.05){ const sx = cw/2; const sy = ch; const tx = Math.random()*cw; const ty = Math.random()*ch/2; fireworks.push(new Firework(sx,sy,tx,ty,Math.random()*360)); }
+  for(let i=fireworks.length-1;i>=0;i--){ const f=fireworks[i]; f.draw(); if(f.update()) fireworks.splice(i,1); }
+  for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.draw(); if(p.update()) particles.splice(i,1); }
+  requestAnimationFrame(loop);
+}
+loop();
+
+// Share/count logic
+const STORAGE = 'diwali_v1_state';
+let state = {count:0};
+try{ const s = JSON.parse(localStorage.getItem(STORAGE)); if(s) state = s; }catch(e){}
+const badge = document.getElementById('shareBadge');
+const gen = document.getElementById('gen');
+const nameInput = document.getElementById('nameInput');
+const gbox = document.getElementById('gbox');
+const gtext = document.getElementById('gtext');
+const wa = document.getElementById('wa');
+const copyBtn = document.getElementById('copy');
+const surprise = document.getElementById('surprise');
+const offerLink = document.getElementById('offerLink');
+const modal = document.getElementById('modal');
+const termsBtn = document.getElementById('termsBtn');
+const closeModal = document.getElementById('closeModal');
+
+function save(){ localStorage.setItem(STORAGE, JSON.stringify(state)); badge.textContent = 'Total shares: '+state.count; }
+save();
+
+gen.addEventListener('click', ()=>{
+  const name = (nameInput.value || '').trim() || 'आप';
+  gtext.textContent = name + ' की तरफ़ से आपको दीपावली की हार्दिक शुभकामनाएँ! 🎉';
+  gbox.style.display = 'block';
+  // set offerLink placeholder (owner will change href after upload)
+  offerLink.href = '#';
+});
+
+function recordShare(){
+  const now = Date.now();
+  if(state.last && now - state.last < 800) return;
+  state.last = now; state.count = Math.min(999, (state.count||0)+1); save();
+  if(state.count >= 5){ surprise.style.display = 'block'; gbox.scrollIntoView({behavior:'smooth'}); }
+  // show small toast
+  showToast('Share recorded: '+state.count);
+}
+
+wa.addEventListener('click', ()=>{
+  const name = (nameInput.value || '').trim() || 'आप';
+  const text = encodeURIComponent(name + ' की तरफ़ से Happy Diwali! 🎆\nClick to see: ' + location.href);
+  window.open('https://wa.me/?text='+text, '_blank');
+  recordShare();
+});
+copyBtn.addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText(location.href); showToast('Link copied — अब paste करके भेज दें'); }
+  catch(e){ prompt('Copy this link', location.href); }
+  recordShare();
+});
+
+// modal
+termsBtn.addEventListener('click', ()=>{ modal.style.display = 'flex'; });
+closeModal.addEventListener('click', ()=>{ modal.style.display = 'none'; });
+
+// toast
+let tt; function showToast(msg){ const el = document.createElement('div'); el.textContent = msg; el.style.position='fixed'; el.style.left='50%'; el.style.transform='translateX(-50%)'; el.style.bottom='18px'; el.style.background='rgba(0,0,0,0.7)'; el.style.color='#fff'; el.style.padding='8px 12px'; el.style.borderRadius='8px'; el.style.zIndex=9999; document.body.appendChild(el); clearTimeout(tt); tt=setTimeout(()=>el.remove(),2000); }
+
+</script>
+</body>
+</html>
